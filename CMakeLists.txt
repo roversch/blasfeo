@@ -37,14 +37,10 @@ cmake_minimum_required(VERSION 2.8.11)
 
 project(blasfeo C ASM)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
-# enable_language(C ASM)
-
 
 # Target architecture
-set(TARGET X64_AUTOMATIC CACHE STRING "Target architecture")
-# set(TARGET X64_INTEL_HASWELL CACHE STRING "Target architecture")
+# set(TARGET X64_AUTOMATIC CACHE STRING "Target architecture")
+set(TARGET X64_INTEL_HASWELL CACHE STRING "Target architecture")
 # set(TARGET X64_INTEL_SANDY_BRIDGE CACHE STRING "Target architecture")
 # set(TARGET X64_INTEL_CORE CACHE STRING "Target architecture")
 # set(TARGET X64_AMD_BULLDOZER CACHE STRING "Target architecture")
@@ -55,57 +51,11 @@ set(TARGET X64_AUTOMATIC CACHE STRING "Target architecture")
 # set(TARGET ARMV7A_ARM_CORTEX_A7 CACHE STRING "Target architecture")
 # set(TARGET GENERIC)
 
-# Populate a list of allowable targets and link it to the option
-set(ALLOWED_TARGETS
-		X64_AUTOMATIC
-		X64_INTEL_HASWELL
-		X64_INTEL_SANDY_BRIDGE
-		X64_INTEL_CORE
-		X64_AMD_BULLDOZER
-		ARMV8A_ARM_CORTEX_A57
-		ARMV8A_ARM_CORTEX_A53
-		ARMV7A_ARM_CORTEX_A15
-		ARMV7A_ARM_CORTEX_A9
-		ARMV7A_ARM_CORTEX_A7
-		GENERIC
-		)
-set_property(CACHE TARGET PROPERTY STRINGS ${ALLOWED_TARGETS})
-
-# This list contains the targets to try when the user sets the target to
-# X64_AUTOMATIC. The order they appear in this list is the order in which
-# they are tested, and the first working (both compile and run) will be
-# selected for use
-set(X64_AUTOMATIC_TARGETS
-		X64_INTEL_HASWELL
-		X64_AMD_BULLDOZER
-		X64_INTEL_SANDY_BRIDGE
-		X64_INTEL_CORE
-		GENERIC
-		)
-
-
-list(FIND ALLOWED_TARGETS ${TARGET} isvalid)
-if(${isvalid} EQUAL -1)
-	message(FATAL_ERROR "Target ${TARGET} is not supported")
-endif()
-
 # Linear Algebra backend
 set(LA HIGH_PERFORMANCE CACHE STRING "Linear algebra backend")
 # set(LA REFERENCE CACHE STRING "Linear algebra backend")
 # set(LA BLAS CACHE STRING "Linear algebra backend")
 
-# Populate the list of allowed LA backends and link it to the option
-set(ALLOWED_BACKENDS
-	  HIGH_PERFORMANCE
-	  REFERENCE
-	  BLAS
-	  )
-set_property(CACHE LA PROPERTY STRINGS ${ALLOWED_BACKENDS})
-
-list(FIND ALLOWED_BACKENDS ${LA} isvalid)
-if(${isvalid} EQUAL -1)
-	message(FATAL_ERROR "LA backend ${LA} is not supported")
-endif()
 
 # BLAS and LAPACK version (for LA=BLAS in BLASFEO or for BLASFEO_BENCHMARS=ON)
 set(EXTERNAL_BLAS 0 CACHE STRING "Reference blas to use")
@@ -115,33 +65,6 @@ set(EXTERNAL_BLAS 0 CACHE STRING "Reference blas to use")
 # set(EXTERNAL_BLAS BLIS CACHE STRING "Reference blas to use")
 # set(EXTERNAL_BLAS ATLAS CACHE STRING "Reference blas to use")
 
-# Populate the list of allowed exernal BLAS tools and link it to the option
-set(ALLOWED_EXTERNAL_BLAS
-		0
-		OPENBLAS
-		NETLIB
-		MKL
-		BLIS
-		ATLAS
-		)
-set_property(CACHE EXTERNAL_BLAS PROPERTY STRINGS ${ALLOWED_EXTERNAL_BLAS})
-
-list(FIND ALLOWED_EXTERNAL_BLAS ${EXTERNAL_BLAS} isvalid)
-if(${isvalid} EQUAL -1)
-	message(FATAL_ERROR "External BLAS ${EXTERNAL_BLAS} is not supported")
-endif()
-
-# Pass the allowed items up to the parent scope (if there is one)
-# This is detected by comparing the project name to the one set earlier in this file
-if(NOT ${CMAKE_PROJECT_NAME} STREQUAL blasfeo)
-	set(BLASFEO_ALLOWED_TARGETS ${ALLOWED_TARGETS} PARENT_SCOPE)
-	set(BLASFEO_ALLOWED_BACKENDS ${ALLOWED_BACKENDS} PARENT_SCOPE)
-	set(BLASFEO_ALLOWED_EXTERNAL_BLAS ${ALLOWED_EXTERNAL_BLAS} PARENT_SCOPE)
-endif()
-
-if(NOT DEFINED(BLASFEO_CROSSCOMPILING))
-	set(BLASFEO_CROSSCOMPILING ${CMAKE_CROSSCOMPILING})
-endif()
 
 # Stack buffer size (malloc for larger)
 set(K_MAX_STACK 300 CACHE STRING "Maximum k value using stack memory")
@@ -171,23 +94,11 @@ if(CMAKE_SYSTEM MATCHES "dSpace" OR CMAKE_BUILD_TYPE MATCHES "Release")
 endif()
 
 # C Compiler
-# set(CC_COMPILER gcc CACHE STRING "compiler")
-# set(CC_COMPILER clang)
-# set(CC_COMPILER x86_64-w64-mingw32-gcc)
 if(CMAKE_C_COMPILER_ID MATCHES MSVC)
 	if(NOT ${TARGET} MATCHES GENERIC)
 		message( FATAL_ERROR "MSVC compiler only supported for TARGET=GENERIC")
 	endif()
 endif()
-
-# build shared library
-set(BUILD_SHARED_LIBS OFF CACHE STRING "Build shared libraries")
-
-# installation directory
-set(CMAKE_INSTALL_PREFIX "/opt/blasfeo" CACHE STRING "Installation path")
-
-# headers installation directory
-set(BLASFEO_HEADERS_INSTALLATION_DIRECTORY "include" CACHE STRING "Headers local installation directory")
 
 # Macro level (code size vs performance in assembly kernels): 0 (no macro),
 # 1 (all macro but gemm kernel), 2 (all macro)
@@ -205,11 +116,7 @@ if(BLASFEO_BENCHMARKS MATCHES ON)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DBENCHMARKS_MODE=1")
 endif()
 
-# search directories
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${BLASFEO_PATH}/include")
-
 # Specify the linear algebra package to use
-message(STATUS "Using linear algebra: ${LA}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DLA_${LA}")
 
 
@@ -254,10 +161,10 @@ endif()
 
 # External BLAS flags
 set(C_FLAGS_BLAS_0        "-DEXTERNAL_BLAS_NONE")
-set(C_FLAGS_BLAS_OPENBLAS "-DEXTERNAL_BLAS_OPENBLAS -I/opt/openblas/include")
-set(C_FLAGS_BLAS_BLIS     "-DEXTERNAL_BLAS_BLIS -std=c99 -I/opt/blis/include/blis")
-set(C_FLAGS_BLAS_NETLIB   "-DEXTERNAL_BLAS_NETLIB -I/opt/netlib/include")
-set(C_FLAGS_BLAS_MKL      "-DEXTERNAL_BLAS_MKL -m64 -I/opt/intel/mkl/include")
+set(C_FLAGS_BLAS_OPENBLAS "-DEXTERNAL_BLAS_OPENBLAS")
+set(C_FLAGS_BLAS_BLIS     "-DEXTERNAL_BLAS_BLIS")
+set(C_FLAGS_BLAS_NETLIB   "-DEXTERNAL_BLAS_NETLIB")
+set(C_FLAGS_BLAS_MKL      "-DEXTERNAL_BLAS_MKL -m64")
 set(C_FLAGS_BLAS_ATLAS    "-DEXTERNAL_BLAS_ATLAS")
 
 message(STATUS "Using external BLAS: ${EXTERNAL_BLAS}")
@@ -266,7 +173,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${C_FLAGS_BLAS_${EXTERNAL_BLAS}}")
 
 # common C flags
 if(CMAKE_C_COMPILER_ID MATCHES "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -fPIC")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
 
@@ -982,7 +889,6 @@ set(BLASFEO_SRC ${CMN_SRC} ${AUX_SRC} ${KERNEL_SRC} ${BLAS_SRC} ${EXT_SRC})
 
 # add library
 add_library(blasfeo ${BLASFEO_SRC})
-
 if(EMBEDDED_TARGET MATCHES XILINX_NONE_ELF )
 	target_link_libraries(blasfeo PUBLIC -Wl,--start-group xil c gcc -Wl,--end-group)
 endif()
@@ -991,7 +897,7 @@ endif()
 target_include_directories(blasfeo
 	PUBLIC
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-		$<INSTALL_INTERFACE:include/blasfeo/include>)
+		$<INSTALL_INTERFACE:include/blasfeo>)
 
 
 install(TARGETS blasfeo EXPORT blasfeoConfig
@@ -1000,10 +906,10 @@ install(TARGETS blasfeo EXPORT blasfeoConfig
 	RUNTIME DESTINATION bin)
 
 
-install(EXPORT blasfeoConfig DESTINATION cmake)
+install(EXPORT blasfeoConfig DESTINATION "share/blasfeo/cmake")
 
 file(GLOB_RECURSE BLASFEO_HEADERS "include/*.h")
-install(FILES ${BLASFEO_HEADERS} DESTINATION ${BLASFEO_HEADERS_INSTALLATION_DIRECTORY})
+install(FILES ${BLASFEO_HEADERS} DESTINATION "include/blasfeo/")
 
 # tests
 if(BLASFEO_TESTING MATCHES ON)
