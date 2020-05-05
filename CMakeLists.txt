@@ -203,15 +203,15 @@ set(ASM_FLAGS_TARGET_ARMV7A_ARM_CORTEX_A7   "-mfpu=neon-vfpv4 -mcpu=cortex-a7")
 set(ASM_FLAGS_TARGET_GENERIC                "")
 
 
-if(${TARGET} MATCHES X64_AUTOMATIC)
-	include(${PROJECT_SOURCE_DIR}/cmake/X64AutomaticTargetSelection.cmake)
-	X64AutomaticTargetSelection()
-	# message(STATUS "Detected target ${TARGET}")
-else()
-	include(${PROJECT_SOURCE_DIR}/cmake/TestSingleTarget.cmake)
-	TestSingleTarget()
-	# message(STATUS "Compiling for target: ${TARGET}")
-endif()
+# if(${TARGET} MATCHES X64_AUTOMATIC)
+# 	include(${PROJECT_SOURCE_DIR}/cmake/X64AutomaticTargetSelection.cmake)
+# 	X64AutomaticTargetSelection()
+# 	# message(STATUS "Detected target ${TARGET}")
+# else()
+# 	include(${PROJECT_SOURCE_DIR}/cmake/TestSingleTarget.cmake)
+# 	TestSingleTarget()
+# 	# message(STATUS "Compiling for target: ${TARGET}")
+# endif()
 
 
 
