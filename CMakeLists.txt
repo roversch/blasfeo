@@ -35,7 +35,8 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-project(blasfeo C ASM)
+cmake_policy(SET CMP0048 NEW)
+project(blasfeo LANGUAGES C ASM VERSION 0.1)
 
 
 # Target architecture
@@ -167,7 +168,7 @@ set(C_FLAGS_BLAS_NETLIB   "-DEXTERNAL_BLAS_NETLIB")
 set(C_FLAGS_BLAS_MKL      "-DEXTERNAL_BLAS_MKL -m64")
 set(C_FLAGS_BLAS_ATLAS    "-DEXTERNAL_BLAS_ATLAS")
 
-message(STATUS "Using external BLAS: ${EXTERNAL_BLAS}")
+# message(STATUS "Using external BLAS: ${EXTERNAL_BLAS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${C_FLAGS_BLAS_${EXTERNAL_BLAS}}")
 
 
@@ -205,11 +206,11 @@ set(ASM_FLAGS_TARGET_GENERIC                "")
 if(${TARGET} MATCHES X64_AUTOMATIC)
 	include(${PROJECT_SOURCE_DIR}/cmake/X64AutomaticTargetSelection.cmake)
 	X64AutomaticTargetSelection()
-	message(STATUS "Detected target ${TARGET}")
+	# message(STATUS "Detected target ${TARGET}")
 else()
 	include(${PROJECT_SOURCE_DIR}/cmake/TestSingleTarget.cmake)
 	TestSingleTarget()
-	message(STATUS "Compiling for target: ${TARGET}")
+	# message(STATUS "Compiling for target: ${TARGET}")
 endif()
 
 
@@ -896,9 +897,11 @@ endif()
 
 target_include_directories(blasfeo
 	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-		$<INSTALL_INTERFACE:include/blasfeo>)
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
+if(USE_C99_MATH)
+	target_compile_definitions(blasfeo PUBLIC USE_C99_MATH)
+endif()
 
 install(TARGETS blasfeo EXPORT blasfeoConfig
 	LIBRARY DESTINATION lib

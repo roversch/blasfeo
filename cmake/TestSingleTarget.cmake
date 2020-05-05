@@ -8,7 +8,7 @@ function(TestSingleTarget)
   TestForISA()
 
   if(${CHK_TARGET_BUILD})
-    message(STATUS "Testing target ${TEST_TARGET}: compilation [success]")
+    # message(STATUS "Testing target ${TEST_TARGET}: compilation [success]")
 
     if(NOT ${BLASFEO_CROSSCOMPILING} )
       if(${CHK_TARGET_RUN})
