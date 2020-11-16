@@ -41,7 +41,7 @@ project(blasfeo LANGUAGES C ASM VERSION 0.1)
 
 # Target architecture
 # set(TARGET X64_AUTOMATIC CACHE STRING "Target architecture")
-set(TARGET X64_INTEL_HASWELL CACHE STRING "Target architecture")
+# set(TARGET X64_INTEL_HASWELL CACHE STRING "Target architecture")
 # set(TARGET X64_INTEL_SANDY_BRIDGE CACHE STRING "Target architecture")
 # set(TARGET X64_INTEL_CORE CACHE STRING "Target architecture")
 # set(TARGET X64_AMD_BULLDOZER CACHE STRING "Target architecture")
@@ -50,7 +50,7 @@ set(TARGET X64_INTEL_HASWELL CACHE STRING "Target architecture")
 # set(TARGET ARMV7A_ARM_CORTEX_A15 CACHE STRING "Target architecture")
 # set(TARGET ARMV7A_ARM_CORTEX_A9 CACHE STRING "Target architecture")
 # set(TARGET ARMV7A_ARM_CORTEX_A7 CACHE STRING "Target architecture")
-# set(TARGET GENERIC)
+set(TARGET GENERIC)
 
 # Linear Algebra backend
 set(LA HIGH_PERFORMANCE CACHE STRING "Linear algebra backend")
